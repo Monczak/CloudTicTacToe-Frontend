@@ -2,6 +2,9 @@ export class GameHandler {
     socket
 
     isInGame = false
+    
+    playerType
+    opponentName
 
     handleMessage = e => {
         switch (e.intent) {
@@ -18,11 +21,21 @@ export class GameHandler {
         
             case "game_start":
                 console.log(`API Game started, playing as ${e.player}, opponent name is ${e.opponentName}`)
+                this.playerType = e.player
+                this.opponentName = e.opponentName
                 this.isInGame = true
                 break
 
             case "move_result":
                 console.log(`API Move result: player ${e.player}, result ${e.moveResult}, board state ${e.boardState}`)
+
+                if (e.moveResult == "winO" || e.moveResult == "winX") {
+                    this.isInGame = false
+                }
+                break
+
+            case "pingpong":
+                console.log(`Keep alive worked`)
                 break
 
             default:
@@ -31,16 +44,35 @@ export class GameHandler {
         }
     }
 
-    joinQueue = () => {
+    connectToAPI = () => {
         const url = new URL("/ws", window.location.href)
         url.protocol = url.protocol.replace("http", "ws")
 
         this.socket = new WebSocket(url)
         console.log(this.socket)
-        this.socket.addEventListener("message", e => handleMessage(JSON.parse(e.data)))
+        this.socket.addEventListener("open", e => {
+            console.log("Connected to API")
+            setInterval(this.keepAlive, 10000)
+        })
+        this.socket.addEventListener("close", e => console.error("API connection closed"))
+        this.socket.addEventListener("message", e => this.handleMessage(JSON.parse(e.data)))
+    }
+
+    keepAlive = () => {
+        this.sendData("pingpong")
+    }
+
+    joinQueue = (playerName) => {
+        if (!this.isInGame) {
+            this.sendData("join_match", {"playerName": playerName})  
+        }
+    }
+
+    sendData = (intent, data) => {
+        this.socket.send(JSON.stringify({"intent": intent, ...data}))
     }
 
     makeMove = cellIdx => {
-
+        this.sendData("make_move", {"cellIdx": cellIdx})
     }
 }

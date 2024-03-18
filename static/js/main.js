@@ -11,16 +11,18 @@ const enableJoinButton = (input) => {
     }
 }
 
-const joinGame = () => {
-    gameHandler.joinQueue()
+const joinGame = (playerName) => {
+    gameHandler.joinQueue(playerName)
 }
 
 const setup = () => {
+    gameHandler.connectToAPI()
+
     const playerNameInput = document.querySelector("#input-player-name")
     playerNameInput.addEventListener("input", e => enableJoinButton(e.target))
     enableJoinButton(playerNameInput)
 
-    document.querySelector("#btn-join-match").addEventListener("click", _ => joinGame())
+    document.querySelector("#btn-join-match").addEventListener("click", _ => joinGame(playerNameInput.value))
 
     console.log("Hello")
 }
