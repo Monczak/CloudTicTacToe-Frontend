@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "cloudtictactoe-frontend"
+version = "0.1.0"
+description = "Flask frontend for the Tic Tac Toe game"
+authors = ["Monczak <szymon.jedrzejczak.sj@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Flask = "^3.0.2"
+gunicorn = "^21.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
