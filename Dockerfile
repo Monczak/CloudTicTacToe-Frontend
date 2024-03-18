@@ -22,6 +22,8 @@ COPY poetry.lock pyproject.toml /app/
 RUN poetry install 
 
 COPY ./src /app/src
+COPY ./static /app/static
+COPY ./templates /app/templates 
 
 CMD poetry run gunicorn --bind 0.0.0.0:$SERVER_PORT src.app:app
 EXPOSE $SERVER_PORT
