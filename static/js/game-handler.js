@@ -6,6 +6,14 @@ export class GameHandler {
     playerType
     opponentName
 
+    onGameStart
+    onMove
+
+    constructor(onGameStart, onMove) {
+        this.onGameStart = onGameStart
+        this.onMove = onMove
+    }
+
     handleMessage = e => {
         switch (e.intent) {
             case "info":
@@ -24,14 +32,18 @@ export class GameHandler {
                 this.playerType = e.player
                 this.opponentName = e.opponentName
                 this.isInGame = true
+
+                this.onGameStart()
                 break
 
             case "move_result":
-                console.log(`API Move result: player ${e.player}, result ${e.moveResult}, board state ${e.boardState}`)
+                console.log(`API Move result: player ${e.player}, result ${e.moveResult}, board state ${e.boardState}, newest move ${e.newestMove}`)
 
                 if (e.moveResult == "winO" || e.moveResult == "winX") {
                     this.isInGame = false
                 }
+
+                this.onMove(e.player, e.moveResult, e.boardState, e.newestMove)
                 break
 
             case "pingpong":
