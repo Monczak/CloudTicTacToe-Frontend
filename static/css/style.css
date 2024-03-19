@@ -23,3 +23,7 @@
     width: 100%;
     aspect-ratio: 1;
 }
+
+.text-bold {
+    font-weight: bold;
+}

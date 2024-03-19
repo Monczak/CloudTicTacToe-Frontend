@@ -8,13 +8,16 @@ export class GameHandler {
 
     onGameStart
     onMove
+    onOpponentDisconnected
 
-    constructor(onGameStart, onMove) {
+    constructor(onGameStart, onMove, onOpponentDisconnected) {
         this.onGameStart = onGameStart
         this.onMove = onMove
+        this.onOpponentDisconnected = onOpponentDisconnected
     }
 
     handleMessage = e => {
+        console.log(e)
         switch (e.intent) {
             case "info":
                 console.log(`API Info: ${e.description}`)
@@ -23,8 +26,10 @@ export class GameHandler {
             case "error":
                 console.error(`API Error: ${e.description}`)
 
-                if (e.description == "Opponent disconnected")
+                if (e.description == "Opponent disconnected") {
                     this.isInGame = false
+                    this.onOpponentDisconnected()
+                }
                 break
         
             case "game_start":
@@ -33,13 +38,13 @@ export class GameHandler {
                 this.opponentName = e.opponentName
                 this.isInGame = true
 
-                this.onGameStart()
+                this.onGameStart(e.player, e.opponentName)
                 break
 
             case "move_result":
                 console.log(`API Move result: player ${e.player}, result ${e.moveResult}, board state ${e.boardState}, newest move ${e.newestMove}`)
 
-                if (e.moveResult == "winO" || e.moveResult == "winX") {
+                if (["winO", "winX", "draw"].includes(e.moveResult)) {
                     this.isInGame = false
                 }
 
@@ -67,7 +72,10 @@ export class GameHandler {
             setInterval(this.keepAlive, 10000)
         })
         this.socket.addEventListener("close", e => console.error("API connection closed"))
-        this.socket.addEventListener("message", e => this.handleMessage(JSON.parse(e.data)))
+        this.socket.addEventListener("message", e => {
+            console.log(e)
+            this.handleMessage(JSON.parse(e.data))
+        })
     }
 
     keepAlive = () => {

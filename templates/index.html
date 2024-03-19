@@ -15,8 +15,8 @@
 
     <body>
         <div class="container">
-            <div class="row mt-5">
-                <div class="d-flex flex-row justify-content-center">
+            <div id="panel-container" class="row mt-5">
+                <div class="d-flex flex-row justify-content-center" data-mode="join">
                     <div class="mx-3 d-flex flex-row">
                         <label for="player-name" class="col-sm-4 col-form-label">Your nickname</label>
                         <input id="input-player-name" name="player-name" class="form-control" type="text">
@@ -24,6 +24,15 @@
                     <div class="mx-3">
                         <a id="btn-join-match" class="btn btn-primary">Join Match</a>
                     </div>
+                </div>
+
+                <div class="d-none text-center" data-mode="matchmaking">
+                    <h3>Looking for opponent...</h3>
+                </div>
+
+                <div class="d-none text-center" data-mode="in-game">
+                    <h3>Playing against <span class="text-bold" id="label-opponent-name">Opponent</span></h3>
+                    <h6 id="label-turn">Your turn</h6>
                 </div>
             </div>
 
@@ -43,6 +52,12 @@
                 </div>
             </div>
             
+            <div id="result-message-container" class="row mt-5 text-center">
+                <h3 class="d-none" data-mode="win">You won!</h3>
+                <h3 class="d-none" data-mode="lose">You lost...</h3>
+                <h3 class="d-none" data-mode="draw">It's a draw.</h3>
+                <h3 class="d-none" data-mode="disconnected">The opponent disconnected...</h3>
+            </div>
         </div>
 
         <img id="img-o" src="{{ url_for('static', filename='img/o.svg') }}" class="d-none">

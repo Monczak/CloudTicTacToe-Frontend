@@ -2,16 +2,64 @@ import { GameHandler } from "./game-handler.js";
 
 let board = []
 
-const gameStartHandler = () => {
-    console.log("New game")
+const setInfoPanel = mode => {
+    const container = document.querySelector("#panel-container")
+    for (let child of container.children) {
+        child.classList.add("d-none")
+    }
+
+    const panel = container.querySelector(`[data-mode=${mode}]`)
+    panel?.classList.remove("d-none")
+}
+
+const setPlayerTurnText = (player, firstTurn) => {
+    const label = document.querySelector("#label-turn")
+    if (firstTurn) {
+        label.textContent = gameHandler.playerType == "O" ? "Your turn" : "Opponent's turn"
+    }
+    else {
+        label.textContent = gameHandler.playerType != player ? "Your turn" : "Opponent's turn"
+    }
+}
+
+const setResultPanel = mode => {
+    const container = document.querySelector("#result-message-container")
+    for (let child of container.children) {
+        child.classList.add("d-none")
+    }
+
+    const panel = container.querySelector(`[data-mode=${mode}]`)
+    panel?.classList.remove("d-none")
+}
+
+const gameStartHandler = (player, opponentName) => {
     clearBoard()
+    setInfoPanel("in-game")
+    document.querySelector("#label-opponent-name").textContent = opponentName
+    setPlayerTurnText(player, true)
 }
 
 const moveHandler = (player, result, boardState, newestMove) => {
     addPlayerIcon(board[newestMove], player)
+    setPlayerTurnText(player, false)
+
+    if (["winO", "winX", "draw"].includes(result)) {
+        if (result == "draw") setResultPanel("draw")
+        else {
+            const winner = result[3]
+            setResultPanel(winner == gameHandler.playerType ? "win" : "lose")
+        }
+
+        setTimeout(() => setInfoPanel("join"), 2000)
+    }
 }
 
-const gameHandler = new GameHandler(gameStartHandler, moveHandler)
+const onOpponentDisconnected = () => {
+    setResultPanel("disconnected")
+    setTimeout(() => setInfoPanel("join"), 2000)
+}
+
+const gameHandler = new GameHandler(gameStartHandler, moveHandler, onOpponentDisconnected)
 
 const enableJoinButton = (input) => {
     if (/\S/.test(input.value)) {
@@ -24,6 +72,8 @@ const enableJoinButton = (input) => {
 
 const joinGame = (playerName) => {
     gameHandler.joinQueue(playerName)
+    setInfoPanel("matchmaking")
+    setResultPanel("hidden")
 }
 
 const addPlayerIcon = (elem, type) => {
