@@ -12,13 +12,18 @@ const setInfoPanel = mode => {
     panel?.classList.remove("d-none")
 }
 
-const setPlayerTurnText = (player, firstTurn) => {
+const setPlayerTurnText = (player, firstTurn, gameOver = false) => {
     const label = document.querySelector("#label-turn")
-    if (firstTurn) {
-        label.textContent = gameHandler.playerType == "O" ? "Your turn" : "Opponent's turn"
+    if (gameOver) {
+        label.textContent = "Game over"
     }
     else {
-        label.textContent = gameHandler.playerType != player ? "Your turn" : "Opponent's turn"
+        if (firstTurn) {
+            label.textContent = gameHandler.playerType == "O" ? "Your turn" : "Opponent's turn"
+        }
+        else {
+            label.textContent = gameHandler.playerType != player ? "Your turn" : "Opponent's turn"
+        }
     }
 }
 
@@ -36,12 +41,12 @@ const gameStartHandler = (player, opponentName) => {
     clearBoard()
     setInfoPanel("in-game")
     document.querySelector("#label-opponent-name").textContent = opponentName
+    document.querySelector("#label-player").textContent = player
     setPlayerTurnText(player, true)
 }
 
 const moveHandler = (player, result, boardState, newestMove) => {
     addPlayerIcon(board[newestMove], player)
-    setPlayerTurnText(player, false)
 
     if (["winO", "winX", "draw"].includes(result)) {
         if (result == "draw") setResultPanel("draw")
@@ -51,6 +56,10 @@ const moveHandler = (player, result, boardState, newestMove) => {
         }
 
         setTimeout(() => setInfoPanel("join"), 2000)
+        setPlayerTurnText(player, false, true)
+    }
+    else {
+        setPlayerTurnText(player, false)
     }
 }
 
