@@ -3,6 +3,8 @@ ARG PORT=8000
 FROM python:3.11.7-alpine
 ARG PORT
 
+RUN apk add openssl
+
 ENV SERVER_PORT=$PORT
 
 ENV POETRY_VERSION=1.8.2
@@ -17,7 +19,7 @@ RUN python3 -m venv $POETRY_VENV \
 ENV PATH="${PATH}:${POETRY_VENV}/bin"
 
 WORKDIR /app
-COPY poetry.lock pyproject.toml /app/
+COPY poetry.lock pyproject.toml run.sh /app/
 
 RUN poetry install 
 
@@ -25,5 +27,5 @@ COPY ./src /app/src
 COPY ./static /app/static
 COPY ./templates /app/templates 
 
-CMD poetry run gunicorn --bind 0.0.0.0:$SERVER_PORT src.app:app
+ENTRYPOINT [ "sh", "/app/run.sh" ]
 EXPOSE $SERVER_PORT
