@@ -3,6 +3,9 @@
     {% if not user_logged_in %}
         <a href="{{ url_for('login') }}">Login</a>
     {% else %}
-        <a>Hello user!</a>
+        <div>
+            <a>Hello {{ username }}!</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
     {% endif %}
 </nav>
