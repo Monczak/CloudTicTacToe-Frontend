@@ -1,0 +1,8 @@
+<nav class="navbar">
+    <a class="navbar-brand" href="{{ url_for('index') }}">Cloud Tic Tac Toe</a>
+    {% if not user_logged_in %}
+        <a href="{{ url_for('login') }}">Login</a>
+    {% else %}
+        <a>Hello user!</a>
+    {% endif %}
+</nav>
