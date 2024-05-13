@@ -1,3 +1,5 @@
+import { getCookie } from "./utils.js"
+
 export class GameHandler {
     socket
 
@@ -82,14 +84,14 @@ export class GameHandler {
         this.sendData("pingpong")
     }
 
-    joinQueue = (playerName) => {
+    joinQueue = () => {
         if (!this.isInGame) {
-            this.sendData("join_match", {"playerName": playerName})  
+            this.sendData("join_match")  
         }
     }
 
     sendData = (intent, data) => {
-        this.socket.send(JSON.stringify({"intent": intent, ...data}))
+        this.socket.send(JSON.stringify({"intent": intent, "token": getCookie("AccessToken") || "", ...data}))
     }
 
     makeMove = cellIdx => {

@@ -89,7 +89,10 @@ def logout():
     response_json = response.json()
 
     if response_json["intent"] == "success":
-        return redirect("/")
+        server_response = make_response(redirect("/"))
+        server_response.set_cookie("AccessToken", "", expires=0)
+        server_response.set_cookie("RefreshToken", "", expires=0)
+        return server_response
     return f"Couldn't log out: {response_json['description']}", 400
 
 
@@ -102,7 +105,6 @@ def index():
     response = requests.get(f"{AUTH_ADDRESS}/auth/get_user", 
                             headers={"Authorization": f"Bearer {access_token}"}, 
                             verify=False, timeout=30)
-    print(response.text)
     response_json = response.json()
 
     if response_json["intent"] == "success":

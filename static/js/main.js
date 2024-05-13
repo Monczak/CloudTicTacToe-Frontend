@@ -1,4 +1,5 @@
 import { GameHandler } from "./game-handler.js";
+import { getCookie } from "./utils.js";
 
 let board = []
 
@@ -70,8 +71,8 @@ const onOpponentDisconnected = () => {
 
 const gameHandler = new GameHandler(gameStartHandler, moveHandler, onOpponentDisconnected)
 
-const enableJoinButton = (input) => {
-    if (/\S/.test(input.value)) {
+const enableJoinButton = (enabled) => {
+    if (enabled) {
         document.querySelector("#btn-join-match").classList.remove("disabled")
     }
     else {
@@ -113,12 +114,9 @@ const setupBoard = () => {
 
 const setup = () => {
     gameHandler.connectToAPI()
+    enableJoinButton(getCookie("AccessToken") !== undefined)
 
-    const playerNameInput = document.querySelector("#input-player-name")
-    playerNameInput.addEventListener("input", e => enableJoinButton(e.target))
-    enableJoinButton(playerNameInput)
-
-    document.querySelector("#btn-join-match").addEventListener("click", _ => joinGame(playerNameInput.value))
+    document.querySelector("#btn-join-match").addEventListener("click", _ => joinGame())
 
     setupBoard()
 
