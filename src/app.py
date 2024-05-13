@@ -2,7 +2,7 @@ import os
 from flask import Flask, make_response, render_template, request, redirect, session
 import requests
 
-AUTH_ADDRESS = "https://127.0.0.1:8001"
+AUTH_ADDRESS = "https://backend:8001"
 
 app = Flask(__name__, 
             template_folder="../templates",
@@ -22,15 +22,16 @@ def login_post():
     password = request.form["password"]
     response = requests.post(f"{AUTH_ADDRESS}/auth?action=login", 
                                         json={"username": username, "password": password}, 
-                                        verify=False, timeout=30).json()
+                                        verify=False, timeout=30)
+    response_json = response.json()
     
-    if response["intent"] == "success":
+    if response_json["intent"] == "success":
         server_response = make_response(redirect("/"))
-        server_response.set_cookie("AccessToken", response["access_token"], max_age=int(response["expires_in"]))
-        server_response.set_cookie("RefreshToken", response["refresh_token"], max_age=int(response["expires_in"]))
+        server_response.set_cookie("AccessToken", response_json["access_token"], max_age=int(response_json["expires_in"]))
+        server_response.set_cookie("RefreshToken", response_json["refresh_token"], max_age=int(response_json["expires_in"]))
         return server_response
 
-    return render_template("login.html", error=response["description"])
+    return render_template("login.html", error=response_json["description"])
 
 
 @app.route("/signup", methods=["GET"])
@@ -89,7 +90,7 @@ def logout():
 
     if response_json["intent"] == "success":
         return redirect("/")
-    return f"Couldn't log out: {response_json["description"]}", 400
+    return f"Couldn't log out: {response_json['description']}", 400
 
 
 @app.route("/")
