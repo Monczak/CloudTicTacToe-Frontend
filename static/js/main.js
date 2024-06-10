@@ -43,6 +43,7 @@ const gameStartHandler = (player, opponentName) => {
     setInfoPanel("in-game")
     document.querySelector("#label-opponent-name").textContent = opponentName
     document.querySelector("#label-player").textContent = player
+    document.querySelector("#opponent-avatar").src = new URL(`/get-avatar?username=${opponentName}`, window.location.href)
     setPlayerTurnText(player, true)
 }
 

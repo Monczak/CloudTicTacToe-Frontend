@@ -4,8 +4,14 @@
         <a href="{{ url_for('login') }}">Login</a>
     {% else %}
         <div>
+            <img src="" class="avatar" data-username="{{ username }}" id="avatar">
             <a>Hello {{ username }}!</a>
             <a href="{{ url_for('logout') }}">Logout</a>
         </div>
     {% endif %}
 </nav>
+
+<script>
+    const avatar = document.querySelector("#avatar")
+    avatar.src = new URL(`/get-avatar?username=${avatar.dataset.username}`, window.location.href)
+</script>

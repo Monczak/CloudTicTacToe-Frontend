@@ -22,10 +22,12 @@
                 <div class="col-4">
                     <h3>Create a new account</h3>
 
-                    <form class="row g-3" method="post">
+                    <form class="row g-3" method="post" enctype="multipart/form-data">
                         <input type="email" name="email" placeholder="Email" class="form-control">
                         <input type="text" name="username" placeholder="Username" class="form-control">
                         <input type="password" name="password" placeholder="Password" class="form-control">
+
+                        <input type="file" name="avatar" class="form-control" accept="image/png">
 
                         <div class="mt-2">
                             <span class="text-danger">{{ error }}</span>

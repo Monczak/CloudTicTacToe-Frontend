@@ -1,14 +1,27 @@
 import os
-from flask import Flask, make_response, render_template, request, redirect, session
+import io
+from flask import Flask, make_response, render_template, request, redirect, session, jsonify, send_file
 import requests
 
-AUTH_ADDRESS = "https://backend:8001"
+API_ADDRESS = "https://backend:8001"
 
 app = Flask(__name__, 
             template_folder="../templates",
             static_folder="../static")
 
 app.secret_key = os.environ["FLASK_SECRET_KEY"]
+
+
+@app.route("/get-avatar")
+def get_avatar():
+    username = request.args.get("username")
+    response = requests.get(f"{API_ADDRESS}/get-avatar?username={username}", verify=False)
+    response_json = response.json()
+    if response_json["intent"] == "success":
+        avatar_response = requests.get(response_json["url"])
+        return send_file(io.BytesIO(avatar_response.content), mimetype="image/png")
+    else:
+        return send_file(os.path.join(os.path.abspath(app.static_folder), "img/avatar_placeholder.png"), mimetype="image/png")
 
 
 def set_tokens(response, access_token, refresh_token, expires_in):
@@ -26,7 +39,7 @@ def login():
 def login_post():
     username = request.form["username"]
     password = request.form["password"]
-    response = requests.post(f"{AUTH_ADDRESS}/auth?action=login", 
+    response = requests.post(f"{API_ADDRESS}/auth?action=login", 
                                         json={"username": username, "password": password}, 
                                         verify=False, timeout=30)
     response_json = response.json()
@@ -49,12 +62,22 @@ def signup_post():
     email = request.form["email"]
     username = request.form["username"]
     password = request.form["password"]
-    response = requests.post(f"{AUTH_ADDRESS}/auth?action=signup", 
-                                        json={"email": email, "username": username, "password": password}, 
+
+    if request.files["avatar"].filename:
+            if request.files["avatar"].mimetype != "image/png":
+                return render_template("signup.html", error="Avatar is not a PNG")
+    
+    response = requests.post(f"{API_ADDRESS}/auth?action=signup", 
+                                        json={"email": email, "username": username, "password": password},
                                         verify=False, timeout=30)
     response_json = response.json()
     
     if response_json["intent"] == "awaiting_verification":
+        if request.files["avatar"].filename:
+            requests.post(f"{API_ADDRESS}/upload-avatar?username={username}", 
+                                            files={k: (f.filename, f.stream, f.content_type, f.headers) for k, f in request.files.items()}, 
+                                            verify=False, timeout=30)
+
         session["email"] = email
         session["username"] = username
         return redirect("verifyuser")
@@ -70,7 +93,7 @@ def verify_user():
 @app.route("/verifyuser", methods=["POST"])
 def verify_user_post():
     code = request.form["code"]
-    response = requests.post(f"{AUTH_ADDRESS}/auth?action=verify", 
+    response = requests.post(f"{API_ADDRESS}/auth?action=verify", 
                                         json={"code": code, "username": session["username"]}, 
                                         verify=False, timeout=30).json()
 
@@ -86,7 +109,7 @@ def logout():
     if access_token is None:
         return redirect("/")
     
-    response = requests.get(f"{AUTH_ADDRESS}/auth?action=logout", 
+    response = requests.get(f"{API_ADDRESS}/auth?action=logout", 
                             headers={"Authorization": f"Bearer {access_token}"}, 
                             verify=False, timeout=30)
     response_json = response.json()
@@ -106,20 +129,20 @@ def index():
     if access_token is None:
         return render_template("index.html", user_logged_in=False)
     
-    response = requests.get(f"{AUTH_ADDRESS}/auth/get_user", 
+    response = requests.get(f"{API_ADDRESS}/auth/get_user", 
                             headers={"Authorization": f"Bearer {access_token}"}, 
                             verify=False, timeout=30)
     
     response_json = response.json()
 
     if response.status_code == 401:
-        refresh_response = requests.post(f"{AUTH_ADDRESS}/auth?action=refresh", 
+        refresh_response = requests.post(f"{API_ADDRESS}/auth?action=refresh", 
                             json={"REFRESH_TOKEN": refresh_token}, 
                             verify=False, timeout=30)
         
         response_json = refresh_response.json()
         if response_json["intent"] == "success":
-            user_response = requests.get(f"{AUTH_ADDRESS}/auth/get_user", 
+            user_response = requests.get(f"{API_ADDRESS}/auth/get_user", 
                             headers={"Authorization": f"Bearer {access_token}"}, 
                             verify=False, timeout=30)
     

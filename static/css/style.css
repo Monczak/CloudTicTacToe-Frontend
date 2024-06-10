@@ -27,3 +27,10 @@
 .text-bold {
     font-weight: bold;
 }
+
+.avatar {
+    vertical-align: middle;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+ }
