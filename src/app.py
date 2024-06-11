@@ -24,6 +24,13 @@ def get_avatar():
         return send_file(os.path.join(os.path.abspath(app.static_folder), "img/avatar_placeholder.png"), mimetype="image/png")
 
 
+@app.route("/get-results")
+def get_results():
+    response = requests.get(f"{API_ADDRESS}/get-results", verify=False)
+    response_json = response.json()
+    return jsonify(response_json)
+
+
 def set_tokens(response, access_token, refresh_token, expires_in):
     response.set_cookie("AccessToken",  access_token, max_age=expires_in)
     response.set_cookie("RefreshToken", refresh_token, max_age=expires_in)
